@@ -1,27 +1,31 @@
 import smtplib
+import logging
+import os
 from datetime import datetime
 
 class NotificationService:
-    def __init__(self):
+    def __init__(self, email_host=None, email_port=None, email_user=None, email_password=None):
         self.notifications = []
-        self.email_host = 'smtp.gmail.com'
-        self.email_port = 587
-        self.email_user = 'taskmanager@gmail.com'
-        self.email_password = 'senha123'
+        self.email_host = email_host or os.getenv('SMTP_HOST')
+        self.email_port = int(email_port or os.getenv('SMTP_PORT', '587'))
+        self.email_user = email_user or os.getenv('SMTP_USER')
+        self.email_password = email_password or os.getenv('SMTP_PASSWORD')
 
     def send_email(self, to, subject, body):
+        if not all((self.email_host, self.email_user, self.email_password)):
+            logging.getLogger(__name__).error("SMTP configuration is incomplete")
+            return False
         try:
-
             server = smtplib.SMTP(self.email_host, self.email_port)
             server.starttls()
             server.login(self.email_user, self.email_password)
             message = f"Subject: {subject}\n\n{body}"
             server.sendmail(self.email_user, to, message)
             server.quit()
-            print(f"Email enviado para {to}")
+            logging.getLogger(__name__).info("Email sent", extra={"recipient": to})
             return True
-        except Exception as e:
-            print(f"Erro ao enviar email: {str(e)}")
+        except (smtplib.SMTPException, OSError):
+            logging.getLogger(__name__).exception("Email delivery failed")
             return False
 
     def notify_task_assigned(self, user, task):

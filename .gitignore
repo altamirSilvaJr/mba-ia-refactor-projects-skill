@@ -1,12 +1,11 @@
-.env
-node_modules/
-
-# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.db
+*.sqlite
+*.sqlite3
+.env
 .venv/
 venv/
-
-# SQLite
-*.db
-instance/
+node_modules/
+coverage/
+.coverage
