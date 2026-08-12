@@ -1,10 +1,5 @@
 from datetime import datetime
 import re
-import os
-import json
-import sys
-import math
-import hashlib
 
 def format_date(date_obj):
     if date_obj:
@@ -43,10 +38,10 @@ def log_action(action, details=None):
 def parse_date(date_string):
     try:
         return datetime.strptime(date_string, '%Y-%m-%d')
-    except:
+    except (TypeError, ValueError):
         try:
             return datetime.strptime(date_string, '%d/%m/%Y')
-        except:
+        except (TypeError, ValueError):
             return None
 
 def is_valid_color(color):
@@ -85,7 +80,7 @@ def process_task_data(data, existing_task=None):
                 result['priority'] = p
             else:
                 return None, 'Prioridade deve ser entre 1 e 5'
-        except:
+        except (TypeError, ValueError):
             return None, 'Prioridade inválida'
 
     if 'due_date' in data:

@@ -1,36 +1,38 @@
-"""Script para popular o banco com dados iniciais"""
+"""Script para popular o banco com dados iniciais."""
+import os
 from app import app, db
 from models.task import Task
 from models.user import User
 from models.category import Category
 from datetime import datetime, timedelta
+from sqlalchemy import delete, func, select
 
 def seed_data():
     with app.app_context():
-
-        Task.query.delete()
-        User.query.delete()
-        Category.query.delete()
+        db.create_all()
+        db.session.execute(delete(Task))
+        db.session.execute(delete(User))
+        db.session.execute(delete(Category))
         db.session.commit()
 
         u1 = User()
         u1.name = 'João Silva'
         u1.email = 'joao@email.com'
-        u1.set_password('1234')
+        u1.set_password(os.getenv('SEED_ADMIN_PASSWORD', 'admin-demo-1234'))
         u1.role = 'admin'
         db.session.add(u1)
 
         u2 = User()
         u2.name = 'Maria Santos'
         u2.email = 'maria@email.com'
-        u2.set_password('abcd')
+        u2.set_password(os.getenv('SEED_USER_PASSWORD', 'user-demo-1234'))
         u2.role = 'user'
         db.session.add(u2)
 
         u3 = User()
         u3.name = 'Pedro Oliveira'
         u3.email = 'pedro@email.com'
-        u3.set_password('pass')
+        u3.set_password(os.getenv('SEED_MANAGER_PASSWORD', 'manager-demo-1234'))
         u3.role = 'manager'
         db.session.add(u3)
 
@@ -91,9 +93,9 @@ def seed_data():
 
         db.session.commit()
         print("Seed concluído com sucesso!")
-        print(f"  {User.query.count()} usuários")
-        print(f"  {Category.query.count()} categorias")
-        print(f"  {Task.query.count()} tasks")
+        print(f"  {db.session.scalar(select(func.count(User.id)))} usuários")
+        print(f"  {db.session.scalar(select(func.count(Category.id)))} categorias")
+        print(f"  {db.session.scalar(select(func.count(Task.id)))} tasks")
 
 if __name__ == '__main__':
     seed_data()
